@@ -68,4 +68,4 @@ C:\Users\mseng3>
 - Currently it doesn't account for timezones, or do any of the fancy stats math that uptime.exe does. However, it returns a proper array of PowerShell objects, so that stuff could be done after the fact.
 - It does account for unexpected shutdowns.
 - Use "localhost" to get history for the local computer.
-- By mseng3
+- By mseng3. See my other projects here: https://github.com/mmseng/code-compendium.
