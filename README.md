@@ -65,7 +65,7 @@ C:\Users\mseng3>
 # Advanced example
 Pull the uptime histories of multiple machines and return their latest boot times:
 ```powershell
-$query = "gelib-057-*"
+$query = "computer-name-*"
 $data = Get-ADComputer -Filter { Name -like $query } | ForEach-Object -TimeoutSeconds 300 -Parallel {
     $_ | Add-Member -PassThru -Force -NotePropertyName "_UptimeHistory" -NotePropertyValue (Get-UptimeHistory -ComputerName $_.Name -ErrorAction Ignore | Sort Date)
 }
