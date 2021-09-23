@@ -62,6 +62,19 @@ Date                  Event                              Comment
 C:\Users\mseng3>
 ```
 
+# Advanced example
+Pull the uptime histories of multiple machines and return their latest boot times:
+```powershell
+$query = "gelib-057-*"
+$data = Get-ADComputer -Filter { Name -like $query } | ForEach-Object -TimeoutSeconds 300 -Parallel {
+    $_ | Add-Member -PassThru -Force -NotePropertyName "_UptimeHistory" -NotePropertyValue (Get-UptimeHistory -ComputerName $_.Name -ErrorAction Ignore | Sort Date)
+}
+$summary = $data | Sort Name | Select Name,@{Name="LatestBoot";Expression={$_._UptimeHistory | Select -ExpandProperty Date | Select -Last 1}}
+$summary
+$ts = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
+$summary | Export-Csv -NoTypeInformation -Encoding "Ascii" -Path "c:\engrit\logs\UptimeHistory_$($ts).csv"
+```
+
 # Notes
 - It uses events 6005, 6006, and 6008 as authoritative proof of boots and shutdowns. See the script comments for documentation on the various relevant event IDs.
 - Currently it doesn't account for timezones, or do any of the fancy stats math that uptime.exe does. However, it returns a proper array of PowerShell objects, so that stuff could be done after the fact.
