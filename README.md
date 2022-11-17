@@ -2,7 +2,7 @@
 This is a Powershell module meant to replicate the functionality of the very old Microsoft executable, uptime.exe.
 
 # Usage
-1. Download `Get-UptimeHistory.psm1` to `$HOME\Documents\WindowsPowerShell\Modules\Get-UptimeHistory\Get-UptimeHistory.psm1`
+1. Download `Get-UptimeHistory.psm1` to the appropriate subdirectory of your PowerShell [modules directory](https://github.com/engrit-illinois/how-to-install-a-custom-powershell-module).
 2. Use it, e.g.: `Get-UptimeHistory -ComputerName "computer-name-01"`
 
 # Example output
