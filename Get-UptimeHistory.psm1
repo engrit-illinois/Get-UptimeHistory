@@ -86,10 +86,11 @@ function Get-UptimeHistory {
 			}
 		}
 		$event | Add-Member -NotePropertyName "Comment" -NotePropertyValue $comment
+		$event | Add-Member -NotePropertyName "Computer" -NotePropertyValue $ComputerName
 	}
 	
 	
-	$events = $events | Select @{Name="Date";Expression={$_.TimeCreated}},Event,Comment
+	$events = $events | Select Computer,@{Name="Date";Expression={$_.TimeCreated}},Event,Comment
 	
 	$events
 	
