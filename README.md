@@ -5,7 +5,13 @@ This is a Powershell module meant to replicate the functionality of the very old
 1. Download `Get-UptimeHistory.psm1` to the appropriate subdirectory of your PowerShell [modules directory](https://github.com/engrit-illinois/how-to-install-a-custom-powershell-module).
 2. Use it, e.g.: `Get-UptimeHistory -ComputerName "computer-name-01"`
 
-# Example output
+# Examples
+
+### Basic example and output
+```powershell
+Get-UptimeHistory localhost
+```
+
 ```
 C:\Users\mseng3>Get-UptimeHistory localhost
 
@@ -62,17 +68,39 @@ Date                  Event                              Comment
 C:\Users\mseng3>
 ```
 
-# Advanced example
-Pull the uptime histories of multiple machines and return their latest boot times:
+# Advanced example 1
+Pull the uptime histories of multiple given machines and return just their latest X boot times:
 ```powershell
-$query = "computer-name-*"
-$data = Get-ADComputer -Filter { Name -like $query } | ForEach-Object -TimeoutSeconds 300 -Parallel {
+$query = "comp-name-*"
+$searchBase = "OU=Instructional,OU=Desktops,OU=Engineering,OU=Urbana,DC=ad,DC=uillinois,DC=edu"
+$returnLast = 1
+
+$comps = Get-ADComputer -Filter "name -like '$query'" -SearchBase $searchBase
+$data = $comps | ForEach-Object -TimeoutSeconds 300 -ThrottleLimit 50 -Parallel {
     $_ | Add-Member -PassThru -Force -NotePropertyName "_UptimeHistory" -NotePropertyValue (Get-UptimeHistory -ComputerName $_.Name -ErrorAction Ignore | Sort Date)
 }
-$summary = $data | Sort Name | Select Name,@{Name="LatestBoot";Expression={$_._UptimeHistory | Select -ExpandProperty Date | Select -Last 1}}
-$ts = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
-$summary | Export-Csv -NoTypeInformation -Encoding "Ascii" -Path "c:\engrit\logs\UptimeHistory_$($ts).csv"
+$summary = $data | Sort Name | Select Name,@{Name="LatestBoot";Expression={$_._UptimeHistory | Select -ExpandProperty Date | Select -Last $returnLast}}
 $summary
+```
+
+Export results to a CSV:
+```powershell
+#$ts = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
+#$summary | Export-Csv -NoTypeInformation -Encoding "Ascii" -Path "c:\engrit\logs\UptimeHistory_$($ts).csv"
+```
+
+# Advanced example 2
+Pull the latest 2 full events from multiple given machines. Accompished slightly differently.
+```powershell
+$comps = Get-ADComputer -Filter "name -like 'tl-*'" -SearchBase "OU=Instructional,OU=Desktops,OU=Engineering,OU=Urbana,DC=ad,DC=uillinois,DC=edu" | Select -ExpandProperty "Name"
+$result = $comps | ForEach-Object -ThrottleLimit 50 -Parallel {
+	$comp = $_
+	$events = [PSCustomObject]@{"Computer"=$comp;"Date"=$null;"Event"=$null;"Comment"=$null}
+	try { $events = Get-UptimeHistory $comp }
+	catch { $events.Comment = $_.Exception.Message }
+	$events = $events | Sort "Date" | Select -Last 2
+}
+$result | Sort "Computer","Date" | Format-Table -AutoSize
 ```
 
 # Notes
