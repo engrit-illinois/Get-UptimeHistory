@@ -73,14 +73,14 @@ function Get-UptimeHistory {
 		}
 		else {
 			if($event.Id -eq 6008) {
-				$comment = "  Uptime was: unknown"
+				$comment = "Uptime was:   unknown"
 				$lastShutdown = $null
 			}
 			else {
 				if($lastBoot) {
 					$ts = New-Timespan -Start $lastBoot -End $event.TimeCreated
 					$elapsed = "{0}d {1:d2}h {2:d2}m {3:d2}s {4:d3}ms" -f $ts.Days, $ts.Hours, $ts.Minutes, $ts.Seconds, $ts.Milliseconds
-					$comment = "  Uptime was: $elapsed"
+					$comment = "Uptime was:   $elapsed"
 				}
 				$lastShutdown = $event.TimeCreated
 			}
