@@ -98,12 +98,11 @@ $returnLast = 1
 
 $comps = $queries | ForEach-Object { Get-ADComputer -SearchBase $searchBase -Filter "name -like `"$_`"" -Properties "*" }
 $result = $comps | ForEach-Object -ThrottleLimit 50 -Parallel {
-    $returnLast = $using:returnLast
     $comp = $_.Name
     $events = [PSCustomObject]@{"Computer"=$comp;"Date"=$null;"Event"=$null;"Comment"=$null}
     try { $events = Get-UptimeHistory $comp }
     catch { $events.Comment = $_.Exception.Message }
-    $events | Sort "Date" | Select -Last $returnLast
+    $events | Sort "Date" | Select -Last $using:returnLast
 }
 $result | Sort "Computer","Date" | Format-Table -AutoSize
 ```
