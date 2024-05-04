@@ -69,7 +69,7 @@ C:\Users\mseng3>
 ```
 
 ### Advanced example 1
-Pull the uptime histories of multiple given machines and return just their latest X boot times:
+Pull the uptime histories of multiple machines and return just their latest X boot times:  
 ```powershell
 $query = "comp-name-*"
 $searchBase = "OU=Instructional,OU=Desktops,OU=Engineering,OU=Urbana,DC=ad,DC=uillinois,DC=edu"
@@ -90,9 +90,9 @@ Export results to a CSV:
 ```
 
 ### Advanced example 2
-Pull the latest 1 full events from multiple given machines. Accompished slightly differently and supports multiple queries.
+Pull the latest 1 full events from multiple machines. Accompished slightly differently and supports multiple queries.  
 ```powershell
-$queries = "gelib-057-0*","dcl-l520-0*","siebl-0403a-0*"
+$queries = "comp-name-*","comp-name2-*","comp-name3-01"
 $searchBase = "OU=Instructional,OU=Desktops,OU=Engineering,OU=Urbana,DC=ad,DC=uillinois,DC=edu"
 $returnLast = 1
 
@@ -105,6 +105,24 @@ $result = $comps | ForEach-Object -ThrottleLimit 50 -Parallel {
     $events | Sort "Date" | Select -Last $using:returnLast
 }
 $result | Sort "Computer","Date" | Format-Table -AutoSize
+```
+
+### Advanced example 3
+Pull all "unexpected shutdown" events from multiple machines. Useful for finding machines with hardware issues.  
+```powershell
+$queries = "comp-name-*","comp-name2-*","comp-name3-01"
+$searchBase = "OU=Instructional,OU=Desktops,OU=Engineering,OU=Urbana,DC=ad,DC=uillinois,DC=edu"
+
+$comps = $queries | ForEach-Object { Get-ADComputer -SearchBase $searchBase -Filter "name -like `"$_`"" -Properties "*" }
+$result = $comps | ForEach-Object -ThrottleLimit 50 -Parallel {
+    $returnLast = $using:returnLast
+    $comp = $_.Name
+    $events = [PSCustomObject]@{"Computer"=$comp;"Date"=$null;"Event"=$null;"Comment"=$null}
+    try { $events = Get-UptimeHistory $comp }
+    catch { $events.Comment = $_.Exception.Message }
+    $events | Sort "Date"
+}
+$result | Sort "Computer","Date" | Where { $_.Event -eq "Recovered from unexpected shutdown" } | Format-Table -AutoSize
 ```
 
 # Notes
