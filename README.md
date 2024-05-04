@@ -68,7 +68,7 @@ Date                  Event                              Comment
 C:\Users\mseng3>
 ```
 
-# Advanced example 1
+### Advanced example 1
 Pull the uptime histories of multiple given machines and return just their latest X boot times:
 ```powershell
 $query = "comp-name-*"
@@ -89,16 +89,21 @@ Export results to a CSV:
 #$summary | Export-Csv -NoTypeInformation -Encoding "Ascii" -Path "c:\engrit\logs\UptimeHistory_$($ts).csv"
 ```
 
-# Advanced example 2
-Pull the latest 2 full events from multiple given machines. Accompished slightly differently.
+### Advanced example 2
+Pull the latest 1 full events from multiple given machines. Accompished slightly differently and supports multiple queries.
 ```powershell
-$comps = Get-ADComputer -Filter "name -like 'tl-*'" -SearchBase "OU=Instructional,OU=Desktops,OU=Engineering,OU=Urbana,DC=ad,DC=uillinois,DC=edu" | Select -ExpandProperty "Name"
+$queries = "gelib-057-0*","dcl-l520-0*","siebl-0403a-0*"
+$searchBase = "OU=Instructional,OU=Desktops,OU=Engineering,OU=Urbana,DC=ad,DC=uillinois,DC=edu"
+$returnLast = 1
+
+$comps = $queries | ForEach-Object { Get-ADComputer -SearchBase $searchBase -Filter "name -like `"$_`"" -Properties "*" }
 $result = $comps | ForEach-Object -ThrottleLimit 50 -Parallel {
-	$comp = $_
-	$events = [PSCustomObject]@{"Computer"=$comp;"Date"=$null;"Event"=$null;"Comment"=$null}
-	try { $events = Get-UptimeHistory $comp }
-	catch { $events.Comment = $_.Exception.Message }
-	$events = $events | Sort "Date" | Select -Last 2
+    $returnLast = $using:returnLast
+    $comp = $_.Name
+    $events = [PSCustomObject]@{"Computer"=$comp;"Date"=$null;"Event"=$null;"Comment"=$null}
+    try { $events = Get-UptimeHistory $comp }
+    catch { $events.Comment = $_.Exception.Message }
+    $events | Sort "Date" | Select -Last $returnLast
 }
 $result | Sort "Computer","Date" | Format-Table -AutoSize
 ```
