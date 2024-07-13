@@ -90,7 +90,7 @@ Export results to a CSV:
 ```
 
 ### Advanced example 2
-Pull the latest 1 full events from multiple machines. Accompished slightly differently and supports multiple queries.  
+Pull the latest X full events from multiple machines. Accompished slightly differently and supports multiple queries.  
 ```powershell
 $queries = "comp-name-*","comp-name2-*","comp-name3-01"
 $searchBase = "OU=Instructional,OU=Desktops,OU=Engineering,OU=Urbana,DC=ad,DC=uillinois,DC=edu"
