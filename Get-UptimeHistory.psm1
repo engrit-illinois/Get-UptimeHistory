@@ -8,7 +8,8 @@ function Get-UptimeHistory {
 
 	param(
 		[Parameter(Mandatory=$true,Position=0)]
-		[string]$ComputerName
+		[string]$ComputerName,
+		[switch]$PassThru
 	)
 
 	$EVENT_IDS = @(
@@ -31,10 +32,10 @@ function Get-UptimeHistory {
 		#[PSCustomObject]@{id = 6013; name = "Noon uptime report"},
 		
 		# Actually corresponds to "The process X has initiated the restart / shutdown of computer on behalf of user Y for the following reason: Z."
-		#[PSCustomObject]@{id = 1074; name = "Shutdown"},
+		[PSCustomObject]@{id = 1074; name = "Shutdown initiation"}
 		
 		# Actually corresponds to "The reason supplied by user X for the last unexpected shutdown of this computer is: Y."
-		#[PSCustomObject]@{id = 1076; name = "Unexpected shutdown"}
+		#[PSCustomObject]@{id = 1076; name = "Shutdown reason"}
 	)
 
 	$filter = @{
@@ -61,6 +62,7 @@ function Get-UptimeHistory {
 		
 		$comment = ""
 		if($event.Id -eq 6005) {
+			$lastBoot = $event.TimeCreated
 			if($lastShutdown) {
 				$ts = New-Timespan -Start $lastShutdown -End $event.TimeCreated
 				$elapsed = "{0}d {1:d2}h {2:d2}m {3:d2}s {4:d3}ms" -f $ts.Days, $ts.Hours, $ts.Minutes, $ts.Seconds, $ts.Milliseconds
@@ -69,29 +71,40 @@ function Get-UptimeHistory {
 			else {
 				$comment = "Downtime was: unknown"
 			}
-			$lastBoot = $event.TimeCreated
 		}
-		else {
-			if($event.Id -eq 6008) {
-				$comment = "Uptime was:   unknown"
-				$lastShutdown = $null
+
+		if($event.Id -eq 6008) {
+			$lastShutdown = $null
+			$comment = "Uptime was:   unknown"
+		}
+		
+		if($event.Id -eq 6006) {
+			$lastShutdown = $event.TimeCreated
+			if($lastBoot) {
+				$ts = New-Timespan -Start $lastBoot -End $event.TimeCreated
+				$elapsed = "{0}d {1:d2}h {2:d2}m {3:d2}s {4:d3}ms" -f $ts.Days, $ts.Hours, $ts.Minutes, $ts.Seconds, $ts.Milliseconds
+				$comment = "Uptime was:   $elapsed"
 			}
 			else {
-				if($lastBoot) {
-					$ts = New-Timespan -Start $lastBoot -End $event.TimeCreated
-					$elapsed = "{0}d {1:d2}h {2:d2}m {3:d2}s {4:d3}ms" -f $ts.Days, $ts.Hours, $ts.Minutes, $ts.Seconds, $ts.Milliseconds
-					$comment = "Uptime was:   $elapsed"
-				}
-				$lastShutdown = $event.TimeCreated
+				$comment = "Uptime was:   unknown"
 			}
 		}
+				
+		if($event.Id -eq 1074) {
+			# The process C:\Windows\system32\winlogon.exe (CBTF-TESTVM-01) has initiated the restart of computer CBTF-TESTVM-01 on behalf of user NT AUTHORITY\SYSTEM for the following reason: Operating System: Upgrade (Planned)…
+			$comp = $ComputerName.ToUpper()
+			$summary = $event.Message.Replace("The process ","Process: ").Replace(" ($comp) has initiated the restart of computer $comp ","").Replace("on behalf of user ",", On behalf of: ").Replace(" for the following reason: ",", Reason: ").Replace("...","").Replace("…","")
+			$comment = $summary
+		}
+		
 		$event | Add-Member -NotePropertyName "Comment" -NotePropertyValue $comment
 		$event | Add-Member -NotePropertyName "Computer" -NotePropertyValue $ComputerName
 	}
 	
-	
-	$events = $events | Select Computer,@{Name="Date";Expression={$_.TimeCreated}},Event,Comment
-	
-	$events
-	
+	if($PassThru) {
+		$events
+	}
+	else {
+		$events | Select Computer,TimeCreated,Id,Event,Comment
+	}
 }
