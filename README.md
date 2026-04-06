@@ -5,6 +5,16 @@ This is a Powershell module meant to replicate the functionality of the very old
 1. Download `Get-UptimeHistory.psm1` to the appropriate subdirectory of your PowerShell [modules directory](https://github.com/engrit-illinois/how-to-install-a-custom-powershell-module).
 2. Use it, e.g.: `Get-UptimeHistory -ComputerName "computer-name-01"`
 
+# Parameters
+
+### -ComputerName [string]
+Required string.  
+The name of the target computers.  
+
+### -PassThru
+Optional switch.  
+Returns the entire gathered and calculated set of data, rather than just a summary of select attributes.  
+
 # Examples
 
 ### Basic example and output
@@ -15,8 +25,8 @@ Get-UptimeHistory localhost
 ```
 C:\Users\mseng3>Get-UptimeHistory localhost
 
-Date                  Event                              Comment
-----                  -----                              -------
+TimeCreated           Event                              Comment
+-----------           -----                              -------
 10/18/2019 6:36:22 PM Boot                               Downtime was: unknown
 10/18/2019 6:39:40 PM Shutdown                             Uptime was: 0d 00h 03m 17s 857ms
 10/18/2019 6:40:16 PM Boot                               Downtime was: 0d 00h 00m 36s 253ms
@@ -77,9 +87,9 @@ $returnLast = 1
 
 $comps = Get-ADComputer -Filter "name -like '$query'" -SearchBase $searchBase
 $data = $comps | ForEach-Object -TimeoutSeconds 300 -ThrottleLimit 50 -Parallel {
-    $_ | Add-Member -PassThru -Force -NotePropertyName "_UptimeHistory" -NotePropertyValue (Get-UptimeHistory -ComputerName $_.Name -ErrorAction Ignore | Sort Date)
+    $_ | Add-Member -PassThru -Force -NotePropertyName "_UptimeHistory" -NotePropertyValue (Get-UptimeHistory -ComputerName $_.Name -ErrorAction Ignore | Sort TimeCreated)
 }
-$summary = $data | Sort Name | Select Name,@{Name="LatestBoot";Expression={$_._UptimeHistory | Select -ExpandProperty Date | Select -Last $returnLast}}
+$summary = $data | Sort Name | Select Name,@{Name="LatestBoot";Expression={$_._UptimeHistory | Select -ExpandProperty TimeCreated | Select -Last $returnLast}}
 $summary
 ```
 
@@ -99,12 +109,12 @@ $returnLast = 1
 $comps = $queries | ForEach-Object { Get-ADComputer -SearchBase $searchBase -Filter "name -like `"$_`"" -Properties "*" }
 $result = $comps | ForEach-Object -ThrottleLimit 50 -Parallel {
     $comp = $_.Name
-    $events = [PSCustomObject]@{"Computer"=$comp;"Date"=$null;"Event"=$null;"Comment"=$null}
+    $events = [PSCustomObject]@{"Computer"=$comp;"TimeCreated"=$null;"Event"=$null;"Comment"=$null}
     try { $events = Get-UptimeHistory $comp }
     catch { $events.Comment = $_.Exception.Message }
-    $events | Sort "Date" | Select -Last $using:returnLast
+    $events | Sort "TimeCreated" | Select -Last $using:returnLast
 }
-$result | Sort "Computer","Date" | Format-Table -AutoSize
+$result | Sort "Computer","TimeCreated" | Format-Table -AutoSize
 ```
 
 ### Advanced example 3
@@ -117,12 +127,12 @@ $comps = $queries | ForEach-Object { Get-ADComputer -SearchBase $searchBase -Fil
 $result = $comps | ForEach-Object -ThrottleLimit 50 -Parallel {
     $returnLast = $using:returnLast
     $comp = $_.Name
-    $events = [PSCustomObject]@{"Computer"=$comp;"Date"=$null;"Event"=$null;"Comment"=$null}
+    $events = [PSCustomObject]@{"Computer"=$comp;"TimeCreated"=$null;"Event"=$null;"Comment"=$null}
     try { $events = Get-UptimeHistory $comp }
     catch { $events.Comment = $_.Exception.Message }
-    $events | Sort "Date"
+    $events | Sort "TimeCreated"
 }
-$result | Sort "Computer","Date" | Where { $_.Event -eq "Recovered from unexpected shutdown" } | Format-Table -AutoSize
+$result | Sort "Computer","TimeCreated" | Where { $_.Event -eq "Recovered from unexpected shutdown" } | Format-Table -AutoSize
 ```
 
 # Notes
