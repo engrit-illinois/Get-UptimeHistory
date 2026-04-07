@@ -186,11 +186,12 @@ This event likely occurs when Windows automatically reboots itself to initially 
 - User: NT AUTHORITY\SYSTEM
 - Reason: Operating System: Service pack (Planned)
 
-### Not sure, possibly triggered by pressing the power button?
+### Reboot/shutdown triggered by pressing the power button?
+I never replicated this myself, but I'm guessing it might be from physically pressing the power button.  
+
 - Process: C:\Windows\system32\shutdown.exe
 - User: NT AUTHORITY\SYSTEM
 - Reason: No title for this reason could be found
-- Interpretation: Not sure where this one comes from, but it might be from physically pressing the power button.
 
 # Notes
 - It uses events 6005, 6006, and 6008 as authoritative proof of boots and shutdowns. See the script comments for documentation on the various relevant event IDs.
