@@ -1,5 +1,5 @@
 # Summary
-This is a Powershell module meant to replicate the functionality of the very old Microsoft executable, uptime.exe.
+This is a Powershell module meant to roughly replicate the functionality of the very old Microsoft executable, uptime.exe, while outputting proper PowerShell object data.  
 
 # Usage
 1. Download `Get-UptimeHistory.psm1` to the appropriate subdirectory of your PowerShell [modules directory](https://github.com/engrit-illinois/how-to-install-a-custom-powershell-module).
@@ -19,63 +19,54 @@ Returns the entire gathered and calculated set of data, rather than just a summa
 
 ### Basic example and output
 ```powershell
-Get-UptimeHistory localhost
+Get-UptimeHistory localhost | Format-Table -Wrap
 ```
 
 ```
-C:\Users\mseng3>Get-UptimeHistory localhost
+> Get-UptimeHistory localhost | Format-Table -Wrap
 
-TimeCreated           Event                              Comment
------------           -----                              -------
-10/18/2019 6:36:22 PM Boot                               Downtime was: unknown
-10/18/2019 6:39:40 PM Shutdown                             Uptime was: 0d 00h 03m 17s 857ms
-10/18/2019 6:40:16 PM Boot                               Downtime was: 0d 00h 00m 36s 253ms
-10/20/2019 1:31:26 AM Shutdown                             Uptime was: 1d 06h 51m 09s 375ms
-10/20/2019 1:31:55 AM Boot                               Downtime was: 0d 00h 00m 29s 401ms
-10/26/2019 3:58:34 PM Shutdown                             Uptime was: 6d 14h 26m 38s 455ms
-10/26/2019 3:59:06 PM Boot                               Downtime was: 0d 00h 00m 32s 105ms
-11/3/2019 2:38:33 PM  Recovered from unexpected shutdown   Uptime was: unknown
-11/3/2019 2:38:33 PM  Boot                               Downtime was: unknown
-11/17/2019 3:41:43 AM Shutdown                             Uptime was: 13d 13h 03m 10s 529ms
-11/17/2019 3:42:12 AM Boot                               Downtime was: 0d 00h 00m 28s 899ms
-12/4/2019 5:56:25 PM  Shutdown                             Uptime was: 17d 14h 14m 13s 091ms
-12/4/2019 5:56:56 PM  Boot                               Downtime was: 0d 00h 00m 30s 342ms
-12/13/2019 3:33:27 AM Shutdown                             Uptime was: 8d 09h 36m 31s 513ms
-12/13/2019 3:33:59 AM Boot                               Downtime was: 0d 00h 00m 31s 295ms
-12/29/2019 3:47:55 PM Recovered from unexpected shutdown   Uptime was: unknown
-12/29/2019 3:47:55 PM Boot                               Downtime was: unknown
-12/29/2019 4:20:54 PM Shutdown                             Uptime was: 0d 00h 32m 58s 704ms
-12/29/2019 4:21:23 PM Boot                               Downtime was: 0d 00h 00m 29s 237ms
-12/30/2019 7:24:15 PM Shutdown                             Uptime was: 1d 03h 02m 51s 886ms
-12/30/2019 7:25:13 PM Boot                               Downtime was: 0d 00h 00m 58s 142ms
-1/2/2020 12:55:04 AM  Shutdown                             Uptime was: 2d 05h 29m 50s 584ms
-1/2/2020 12:55:30 AM  Boot                               Downtime was: 0d 00h 00m 26s 727ms
-1/4/2020 12:24:42 PM  Recovered from unexpected shutdown   Uptime was: unknown
-1/4/2020 12:24:42 PM  Boot                               Downtime was: unknown
-1/5/2020 2:11:11 PM   Recovered from unexpected shutdown   Uptime was: unknown
-1/5/2020 2:11:11 PM   Boot                               Downtime was: unknown
-1/16/2020 10:30:16 PM Shutdown                             Uptime was: 11d 08h 19m 05s 623ms
-1/16/2020 10:30:45 PM Boot                               Downtime was: 0d 00h 00m 28s 935ms
-2/13/2020 11:03:51 PM Shutdown                             Uptime was: 28d 00h 33m 06s 200ms
-2/13/2020 11:04:45 PM Boot                               Downtime was: 0d 00h 00m 53s 725ms
-3/13/2020 3:32:00 AM  Shutdown                             Uptime was: 28d 04h 27m 14s 819ms
-3/13/2020 3:32:32 AM  Boot                               Downtime was: 0d 00h 00m 31s 947ms
-3/15/2020 9:12:26 AM  Shutdown                             Uptime was: 2d 05h 39m 53s 939ms
-3/15/2020 9:13:20 AM  Boot                               Downtime was: 0d 00h 00m 53s 990ms
-3/15/2020 9:15:20 AM  Shutdown                             Uptime was: 0d 00h 02m 00s 048ms
-3/15/2020 9:15:48 AM  Boot                               Downtime was: 0d 00h 00m 28s 205ms
-3/15/2020 9:34:14 AM  Shutdown                             Uptime was: 0d 00h 18m 26s 104ms
-3/15/2020 9:34:43 AM  Boot                               Downtime was: 0d 00h 00m 29s 042ms
-3/15/2020 9:34:47 AM  Shutdown                             Uptime was: 0d 00h 00m 03s 877ms
-3/15/2020 9:35:16 AM  Boot                               Downtime was: 0d 00h 00m 29s 061ms
-3/22/2020 6:00:51 PM  Shutdown                             Uptime was: 7d 08h 25m 34s 406ms
-3/22/2020 6:01:44 PM  Boot                               Downtime was: 0d 00h 00m 53s 204ms
-4/18/2020 3:40:38 AM  Shutdown                             Uptime was: 26d 09h 38m 54s 406ms
-4/18/2020 3:41:12 AM  Boot                               Downtime was: 0d 00h 00m 34s 171ms
-4/23/2020 6:56:05 PM  Shutdown                             Uptime was: 5d 15h 14m 52s 371ms
-4/23/2020 6:56:32 PM  Boot                               Downtime was: 0d 00h 00m 27s 577ms
-
-C:\Users\mseng3>
+Computer  TimeCreated           Id Event               Interval                            Type       Process                                                   User                Reason                                    Comment
+--------  -----------           -- -----               --------                            ----       -------                                                   ----                ------                                    -------
+localhost 12/18/2025 18:21:44 6005 Boot                Downtime was: unknown
+localhost 12/18/2025 18:23:04 1074 Shutdown initiation                                     restart    C:\WINDOWS\system32\winlogon.exe                          NT AUTHORITY\SYSTEM Operating System: Upgrade (Planned)
+localhost 12/18/2025 18:23:04 6006 Shutdown            Uptime was:   0d 00h 01m 20s 028ms  restart    C:\WINDOWS\system32\winlogon.exe                          NT AUTHORITY\SYSTEM Operating System: Upgrade (Planned)
+localhost 12/18/2025 18:23:47 6005 Boot                Downtime was: 0d 00h 00m 43s 581ms  restart    C:\WINDOWS\system32\winlogon.exe                          NT AUTHORITY\SYSTEM Operating System: Upgrade (Planned)
+localhost 12/19/2025 09:30:25 1074 Shutdown initiation                                     restart    C:\WINDOWS\uus\AMD64\MoNotificationUx.exe                 UOFI\mseng3         Operating System: Service pack (Planned)
+localhost 12/19/2025 09:33:06 6006 Shutdown            Uptime was:   0d 15h 09m 18s 651ms  restart    C:\WINDOWS\uus\AMD64\MoNotificationUx.exe                 UOFI\mseng3         Operating System: Service pack (Planned)
+localhost 12/19/2025 09:41:41 6005 Boot                Downtime was: 0d 00h 08m 34s 814ms  restart    C:\WINDOWS\uus\AMD64\MoNotificationUx.exe                 UOFI\mseng3         Operating System: Service pack (Planned)
+localhost 12/19/2025 09:42:43 1074 Shutdown initiation                                     restart    C:\WINDOWS\servicing\TrustedInstaller.exe                 NT AUTHORITY\SYSTEM Operating System: Upgrade (Planned)
+localhost 12/19/2025 09:42:44 6006 Shutdown            Uptime was:   0d 00h 01m 02s 736ms  restart    C:\WINDOWS\servicing\TrustedInstaller.exe                 NT AUTHORITY\SYSTEM Operating System: Upgrade (Planned)
+localhost 12/19/2025 09:43:25 6005 Boot                Downtime was: 0d 00h 00m 40s 998ms  restart    C:\WINDOWS\servicing\TrustedInstaller.exe                 NT AUTHORITY\SYSTEM Operating System: Upgrade (Planned)
+localhost 01/14/2026 11:14:25 1074 Shutdown initiation                                     restart    C:\WINDOWS\uus\AMD64\MoNotificationUx.exe                 UOFI\mseng3         Operating System: Service pack (Planned)
+localhost 01/14/2026 11:15:29 6006 Shutdown            Uptime was:   26d 01h 32m 04s 713ms restart    C:\WINDOWS\uus\AMD64\MoNotificationUx.exe                 UOFI\mseng3         Operating System: Service pack (Planned)
+localhost 01/14/2026 11:16:16 6005 Boot                Downtime was: 0d 00h 00m 46s 463ms  restart    C:\WINDOWS\uus\AMD64\MoNotificationUx.exe                 UOFI\mseng3         Operating System: Service pack (Planned)
+localhost 01/14/2026 11:16:46 1074 Shutdown initiation                                     restart    C:\WINDOWS\servicing\TrustedInstaller.exe                 NT AUTHORITY\SYSTEM Operating System: Upgrade (Planned)
+localhost 01/14/2026 11:16:47 6006 Shutdown            Uptime was:   0d 00h 00m 31s 049ms  restart    C:\WINDOWS\servicing\TrustedInstaller.exe                 NT AUTHORITY\SYSTEM Operating System: Upgrade (Planned)
+localhost 01/14/2026 11:17:29 6005 Boot                Downtime was: 0d 00h 00m 42s 255ms  restart    C:\WINDOWS\servicing\TrustedInstaller.exe                 NT AUTHORITY\SYSTEM Operating System: Upgrade (Planned)
+localhost 02/05/2026 16:45:29 1074 Shutdown initiation                                     power off  C:\WINDOWS\Explorer.EXE                                   UOFI\mseng3         Other (Planned)
+localhost 02/05/2026 17:03:15 6006 Shutdown            Uptime was:   22d 05h 45m 45s 434ms power off  C:\WINDOWS\Explorer.EXE                                   UOFI\mseng3         Other (Planned)
+localhost 02/05/2026 17:04:07 6005 Boot                Downtime was: 0d 00h 00m 52s 615ms  power off  C:\WINDOWS\Explorer.EXE                                   UOFI\mseng3         Other (Planned)
+localhost 02/07/2026 17:49:51 1074 Shutdown initiation                                     restart    C:\WINDOWS\system32\winlogon.exe                          NT AUTHORITY\SYSTEM No title for this reason could be found
+localhost 02/07/2026 17:50:07 6006 Shutdown            Uptime was:   2d 00h 46m 00s 102ms  restart    C:\WINDOWS\system32\winlogon.exe                          NT AUTHORITY\SYSTEM No title for this reason could be found
+localhost 02/07/2026 17:50:57 6005 Boot                Downtime was: 0d 00h 00m 49s 326ms  restart    C:\WINDOWS\system32\winlogon.exe                          NT AUTHORITY\SYSTEM No title for this reason could be found
+localhost 02/11/2026 21:15:09 1074 Shutdown initiation                                     restart    C:\WINDOWS\uus\AMD64\MoUsoCoreWorker.exe                  NT AUTHORITY\SYSTEM Operating System: Service pack (Planned)
+localhost 02/11/2026 21:16:45 6006 Shutdown            Uptime was:   4d 03h 25m 48s 083ms  restart    C:\WINDOWS\uus\AMD64\MoUsoCoreWorker.exe                  NT AUTHORITY\SYSTEM Operating System: Service pack (Planned)
+localhost 02/11/2026 21:17:37 6005 Boot                Downtime was: 0d 00h 00m 52s 210ms  restart    C:\WINDOWS\uus\AMD64\MoUsoCoreWorker.exe                  NT AUTHORITY\SYSTEM Operating System: Service pack (Planned)
+localhost 02/11/2026 21:18:24 1074 Shutdown initiation                                     restart    C:\WINDOWS\servicing\TrustedInstaller.exe                 NT AUTHORITY\SYSTEM Operating System: Upgrade (Planned)
+localhost 02/11/2026 21:18:25 6006 Shutdown            Uptime was:   0d 00h 00m 47s 973ms  restart    C:\WINDOWS\servicing\TrustedInstaller.exe                 NT AUTHORITY\SYSTEM Operating System: Upgrade (Planned)
+localhost 02/11/2026 21:19:16 6005 Boot                Downtime was: 0d 00h 00m 50s 611ms  restart    C:\WINDOWS\servicing\TrustedInstaller.exe                 NT AUTHORITY\SYSTEM Operating System: Upgrade (Planned)
+localhost 03/12/2026 03:29:16 1074 Shutdown initiation                                     restart    C:\WINDOWS\uus\packages\preview\AMD64\MoUsoCoreWorker.exe NT AUTHORITY\SYSTEM Operating System: Service pack (Planned)
+localhost 03/12/2026 03:30:49 6006 Shutdown            Uptime was:   28d 06h 11m 33s 852ms restart    C:\WINDOWS\uus\packages\preview\AMD64\MoUsoCoreWorker.exe NT AUTHORITY\SYSTEM Operating System: Service pack (Planned)
+localhost 03/12/2026 03:31:41 6005 Boot                Downtime was: 0d 00h 00m 51s 546ms  restart    C:\WINDOWS\uus\packages\preview\AMD64\MoUsoCoreWorker.exe NT AUTHORITY\SYSTEM Operating System: Service pack (Planned)
+localhost 03/12/2026 03:32:24 1074 Shutdown initiation                                     restart    C:\WINDOWS\servicing\TrustedInstaller.exe                 NT AUTHORITY\SYSTEM Operating System: Upgrade (Planned)
+localhost 03/12/2026 03:32:24 6006 Shutdown            Uptime was:   0d 00h 00m 43s 540ms  restart    C:\WINDOWS\servicing\TrustedInstaller.exe                 NT AUTHORITY\SYSTEM Operating System: Upgrade (Planned)
+localhost 03/12/2026 03:33:15 6005 Boot                Downtime was: 0d 00h 00m 50s 281ms  restart    C:\WINDOWS\servicing\TrustedInstaller.exe                 NT AUTHORITY\SYSTEM Operating System: Upgrade (Planned)
+localhost 03/13/2026 04:08:35 1074 Shutdown initiation                                     restart    C:\WINDOWS\Explorer.EXE                                   UOFI\mseng3         Other (Planned)
+localhost 03/13/2026 04:08:57 6006 Shutdown            Uptime was:   1d 00h 35m 42s 693ms  restart    C:\WINDOWS\Explorer.EXE                                   UOFI\mseng3         Other (Planned)
+localhost 03/13/2026 04:09:49 6005 Boot                Downtime was: 0d 00h 00m 51s 458ms  restart    C:\WINDOWS\Explorer.EXE                                   UOFI\mseng3         Other (Planned)
+localhost 03/31/2026 06:00:29 1074 Shutdown initiation                                     restart    C:\WINDOWS\uus\packages\preview\AMD64\MoUsoCoreWorker.exe NT AUTHORITY\SYSTEM Operating System: Service pack (Planned)
+localhost 03/31/2026 06:00:55 6006 Shutdown            Uptime was:   18d 01h 51m 05s 833ms restart    C:\WINDOWS\uus\packages\preview\AMD64\MoUsoCoreWorker.exe NT AUTHORITY\SYSTEM Operating System: Service pack (Planned)
+localhost 03/31/2026 06:01:47 6005 Boot                Downtime was: 0d 00h 00m 52s 419ms  restart    C:\WINDOWS\uus\packages\preview\AMD64\MoUsoCoreWorker.exe NT AUTHORITY\SYSTEM Operating System: Service pack (Planned)
 ```
 
 ### Advanced example 1

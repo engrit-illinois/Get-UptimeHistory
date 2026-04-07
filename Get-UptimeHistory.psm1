@@ -66,16 +66,16 @@ function Get-UptimeHistory {
 			if($lastShutdown) {
 				$ts = New-Timespan -Start $lastShutdown -End $event.TimeCreated
 				$elapsed = "{0}d {1:d2}h {2:d2}m {3:d2}s {4:d3}ms" -f $ts.Days, $ts.Hours, $ts.Minutes, $ts.Seconds, $ts.Milliseconds
-				$comment = "Downtime was: $elapsed"
+				$interval = "Downtime was: $elapsed"
 			}
 			else {
-				$comment = "Downtime was: unknown"
+				$interval = "Downtime was: unknown"
 			}
 		}
 
 		if($event.Id -eq 6008) {
 			$lastShutdown = $null
-			$comment = "Uptime was:   unknown"
+			$interval = "Uptime was:   unknown"
 		}
 		
 		if($event.Id -eq 6006) {
@@ -83,20 +83,48 @@ function Get-UptimeHistory {
 			if($lastBoot) {
 				$ts = New-Timespan -Start $lastBoot -End $event.TimeCreated
 				$elapsed = "{0}d {1:d2}h {2:d2}m {3:d2}s {4:d3}ms" -f $ts.Days, $ts.Hours, $ts.Minutes, $ts.Seconds, $ts.Milliseconds
-				$comment = "Uptime was:   $elapsed"
+				$interval = "Uptime was:   $elapsed"
 			}
 			else {
-				$comment = "Uptime was:   unknown"
+				$interval = "Uptime was:   unknown"
 			}
 		}
 				
 		if($event.Id -eq 1074) {
-			# The process C:\Windows\system32\winlogon.exe (CBTF-TESTVM-01) has initiated the restart of computer CBTF-TESTVM-01 on behalf of user NT AUTHORITY\SYSTEM for the following reason: Operating System: Upgrade (Planned)…
-			$comp = $ComputerName.ToUpper()
-			$summary = $event.Message.Replace("The process ","Process: ").Replace(" ($comp) has initiated the restart of computer $comp ","").Replace("on behalf of user ",", On behalf of: ").Replace(" for the following reason: ",", Reason: ").Replace("...","").Replace("…","")
-			$comment = $summary
+			# Example of event message:
+			# The process C:\Windows\system32\winlogon.exe (CBTF-TESTVM-01) has initiated the restart of computer CBTF-TESTVM-01 on behalf of user NT AUTHORITY\SYSTEM for the following reason: Operating System: Upgrade (Planned)\n Reason Code: 0x80020003\n Shutdown Type: restart\n Comment: 
+			$message = $event.Message
+			
+			# Combine into single line to avoid having to deal with line breaks:
+			$message = $message.Replace("`n","")
+			
+			# Deconstruct message
+			$regex = 'The process (.*) (\(.*\)) has initiated the (.*) of computer (.*) on behalf of user (.*) for the following reason: (.*) Reason Code: (.*) Shutdown Type: (.*) Comment: (.*)'
+			$match = $message -match $regex
+			
+			if($match) {
+				$process = $Matches[1]
+				$shutdownType1 = $Matches[2]
+				$comp1 = $Matches[3]
+				$comp2 = $Matches[4]
+				$user = $Matches[5]
+				$reason = $Matches[6]
+				$reasonCode = $Matches[7]
+				$shutdownType2 = $Matches[8]
+				$messageComment = $Matches[9] # This seems to basically always be blank
+			}
+			else {
+				# Could not parse event message
+			}
+			
+			$interval = ""
 		}
 		
+		$event | Add-Member -NotePropertyName "Interval" -NotePropertyValue $interval
+		$event | Add-Member -NotePropertyName "Type" -NotePropertyValue $shutdownType2
+		$event | Add-Member -NotePropertyName "Process" -NotePropertyValue $process
+		$event | Add-Member -NotePropertyName "User" -NotePropertyValue $user
+		$event | Add-Member -NotePropertyName "Reason" -NotePropertyValue $reason
 		$event | Add-Member -NotePropertyName "Comment" -NotePropertyValue $comment
 		$event | Add-Member -NotePropertyName "Computer" -NotePropertyValue $ComputerName
 	}
@@ -105,6 +133,6 @@ function Get-UptimeHistory {
 		$events
 	}
 	else {
-		$events | Select Computer,TimeCreated,Id,Event,Comment
+		$events | Select Computer,TimeCreated,Id,Event,Interval,Type,Process,User,Reason,Comment
 	}
 }
