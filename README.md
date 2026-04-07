@@ -126,6 +126,72 @@ $result = $comps | ForEach-Object -ThrottleLimit 50 -Parallel {
 $result | Sort "Computer","TimeCreated" | Where { $_.Event -eq "Recovered from unexpected shutdown" } | Format-Table -AutoSize
 ```
 
+# Interpretation
+Here are some common shutdown initiation events and what they actually mean:
+
+### Reboot triggered by custom recurring MECM deployment to perform nightly reboots
+Currently this is only used on test machines in the CBTF.  
+
+- Process: C:\windows\system32\wbem\wmiprvse.exe
+- User: NT AUTHORITY\SYSTEM
+- Reason: No title for this reason could be found
+
+### Reboot triggered by MECM to complete software or OS updates
+Should only happen during configured maintenance window.  
+
+- Process: C:\Windows\CCM\CcmExec.exe
+- User: NT AUTHORITY\SYSTEM
+- Reason: No title for this reason could be found
+
+### Reboot triggered by Windows to complete pending OS updates
+This is what it should look like any time Windows reboots itself during (or after) the actual update process. I believe the initial reboot will look different.  
+
+For machines using MECM ADRs for OS updates the initial reboot would be triggered by MECM during a maintenance window (or by a user outside of the maintenance window). Once rebooted, Windows will start the pending update process and this event should only be seen when Windows has to initiate a second (or third, etc.) reboot after completing the update process.  
+
+- Process: C:\windows\servicing\TrustedInstaller.exe
+- User: NT AUTHORITY\SYSTEM
+- Reason: Operating System: Upgrade (Planned)
+
+### Reboot triggered by a user from the Start menu
+- Process: C:\Windows\System32\RuntimeBroker.exe
+- User: \<actual user\>
+- Reason: Other (Unplanned)
+
+### Reboot triggered by a user from the Start menu
+- Process: C:\Windows\SystemApps\Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy\StartMenuExperienceHost.exe
+- User: \<actual user\>
+- Reason: Other (Unplanned)
+
+### Reboot triggered by a user from the login screen when there's no active login session
+- Process: C:\windows\system32\winlogon.exe
+- User: NT AUTHORITY\SYSTEM
+- Reason: No title for this reason could be found
+
+### Reboot triggered by a user from the lock screen when there's an active, locked login session
+- Process: C:\windows\system32\winlogon.exe
+- User: \<actual user\>
+- Reason: No title for this reason could be found
+
+### Reboot triggered by the Windows notification system
+I'm guessing this is when the notification system prompts the user to restart (after installing updates) and the user clicks to agree.  
+
+- Process: C:\WINDOWS\uus\AMD64\MoNotificationUx.exe
+- User: \<actual user\>
+- Reason: Operating System: Service pack (Planned)
+
+### Reboot triggered by the Windows Update Orchestrator system
+This event likely occurs when Windows automatically reboots itself to initially start updates. This shouldn't happen for machines configured to use MECM ADRs for OS updates.  
+
+- Process: C:\WINDOWS\uus\AMD64\MoUsoCoreWorker.exe (or C:\WINDOWS\uus\packages\preview\AMD64\MoUsoCoreWorker.exe)
+- User: NT AUTHORITY\SYSTEM
+- Reason: Operating System: Service pack (Planned)
+
+### Not sure, possibly triggered by pressing the power button?
+- Process: C:\Windows\system32\shutdown.exe
+- User: NT AUTHORITY\SYSTEM
+- Reason: No title for this reason could be found
+- Interpretation: Not sure where this one comes from, but it might be from physically pressing the power button.
+
 # Notes
 - It uses events 6005, 6006, and 6008 as authoritative proof of boots and shutdowns. See the script comments for documentation on the various relevant event IDs.
 - Currently it doesn't account for timezones, or do any of the fancy stats math that uptime.exe does. However, it returns a proper array of PowerShell objects, so that stuff could be done after the fact.
